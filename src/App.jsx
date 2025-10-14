@@ -5,12 +5,14 @@ import Home from "./pages/home";
 import Marketplace from "./pages/marketplace";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
+import HeroSection from "./components/common/HeroSection";
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
         <Navbar />
+        <HeroSection />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
