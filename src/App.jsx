@@ -1,23 +1,28 @@
-import { useState, useEffect } from 'react'
-import { supabase } from "./lib/supabaseclient.js";
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/common/navbar";
+import Footer from "./components/common/footer";
+import Home from "./pages/home";
+import Marketplace from "./pages/marketplace";
+import Login from "./pages/login";
+import Signup from "./pages/signup";
 
 function App() {
-  useEffect(() => {
-    async function testConnection(){
-      const {data, error} = await supabase.from('test').select('*');
-      console.log("Supabase connected ✅", {data, error});
-    }
-    testConnection();
-  },[]);
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-      <h1 className="text-4xl font-bold">ANTIQ 2.0 🔥 Connected to Supabase</h1>
-    </div>
+    <Router>
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
 export default App;
-
