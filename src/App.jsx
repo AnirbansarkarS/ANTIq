@@ -6,6 +6,7 @@ import Marketplace from "./pages/marketplace";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import HeroSection from "./components/common/HeroSection";
+import StatsSection from "./components/common/StatsSection";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/signup" element={<Signup />} />
           </Routes>
         </main>
+        <StatsSection />
         <Footer />
       </div>
     </Router>
