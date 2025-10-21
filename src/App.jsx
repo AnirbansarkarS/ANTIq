@@ -7,6 +7,8 @@ import Login from "./pages/login";
 import Signup from "./pages/signup";
 import HeroSection from "./components/common/HeroSection";
 import StatsSection from "./components/common/StatsSection";
+import AuctionCard from "./components/common/AuctionCard";
+import Loader from "./components/common/loader";
 
 function App() {
   return (
@@ -22,8 +24,10 @@ function App() {
             <Route path="/signup" element={<Signup />} />
           </Routes>
         </main>
+        <AuctionCard />
         <StatsSection />
         <Footer />
+  
       </div>
     </Router>
   );

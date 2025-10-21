@@ -12,7 +12,7 @@ const Navbar = () => {
       {/* Logo */}
       <Link
         to="/"
-        className="text-3xl font-serif font-bold tracking-wide text-amber-400 hover:text-amber-300 transition"
+        className="text-3xl font-serif font-bold tracking-wide text-lime-300 hover:text-amber-300 transition"
       >
         ANTIQ
       </Link>
