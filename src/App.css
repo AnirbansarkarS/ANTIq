@@ -1,9 +1,13 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* Make sure the root layout covers full screen */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #0f0f0f; /* or your theme background */
+  overflow-x: hidden;
 }
+
 
 .logo {
   height: 6em;
