@@ -1,78 +1,50 @@
-// src/pages/signup.jsx
 import { useState } from "react";
-import { motion } from "framer-motion";
-// import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../lib/supabaseclient";
+import { useNavigate } from "react-router-dom";
 
-const Signup = () => {
-  const [name, setName] = useState("");
+export default function Signup() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const onSignup = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      // Replace with supabase.auth.signUp(...) call
-      await new Promise((r) => setTimeout(r, 900));
-      alert(`Account (simulated) created for ${name}`);
-    } catch (err) {
-      console.error(err);
-      alert("Signup failed");
-    } finally {
-      setLoading(false);
-    }
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    setLoading(false);
+    if (error) setError(error.message);
+    else navigate("/login");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#fbf7ed] p-6">
-      <motion.form
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        onSubmit={onSignup}
-        className="w-full max-w-lg bg-gradient-to-br from-[#fffaf0] to-[#f3ecd9] border border-amber-300/40 shadow-2xl rounded-xl p-8"
-      >
-        <h2 className="text-2xl font-serif text-blue-900 mb-2">Create your ANTIQ account</h2>
-        <p className="text-sm text-gray-700 mb-6">
-          Join the marketplace and start listing antiques or place bids.
-        </p>
-
-        <div className="grid grid-cols-1 gap-4">
-          <label>
-            <span className="text-sm text-blue-900">Full name</span>
-            <input
-              className="mt-2 w-full rounded-md border border-amber-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              placeholder="Your full name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            <span className="text-sm text-blue-900">Email</span>
-            <input
-              className="mt-2 w-full rounded-md border border-amber-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              placeholder="you@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
-        </div>
-
+    <div className="flex justify-center items-center min-h-screen">
+      <form onSubmit={handleSignup} className="p-6 bg-gray-800 text-white rounded-lg shadow-lg w-80">
+        <h2 className="text-xl font-bold mb-4 text-center">Sign Up</h2>
+        {error && <p className="text-red-400">{error}</p>}
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full mb-3 p-2 rounded bg-gray-700"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full mb-3 p-2 rounded bg-gray-700"
+          onChange={(e) => setPassword(e.target.value)}
+        />
         <button
           disabled={loading}
-          className="w-full mt-6 bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-lg font-semibold shadow-md"
+          className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-2 rounded"
         >
-          {loading ? "Creating..." : "Create Account"}
+          {loading ? "Creating..." : "Sign Up"}
         </button>
-
-        <p className="mt-4 text-center text-gray-700 text-sm">
-          Already have an account? <a href="/login" className="text-amber-700 font-semibold">Login</a>
-        </p>
-      </motion.form>
+      </form>
     </div>
   );
-};
-
-export default Signup;
+}
