@@ -9,6 +9,8 @@ import HeroSection from "./components/common/HeroSection";
 import StatsSection from "./components/common/StatsSection";
 import AuctionCard from "./components/common/AuctionCard";
 import Loader from "./components/common/loader";
+import { AuthProvider } from "./context/AuthContext";
+
 
 function App() {
   return (
