@@ -5,8 +5,11 @@ import Home from "./pages/home";
 import Marketplace from "./pages/marketplace";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
+import AddItem from "./pages/additem";
+import UserDashboard from "./pages/user_dashboard";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./context/ProtectedRoute";
+
 
 function App() {
   return (
@@ -20,7 +23,7 @@ function App() {
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              {/* <Route
+              <Route
                       path="/additem"
                       element={
                         <ProtectedRoute>
@@ -35,7 +38,7 @@ function App() {
                           <UserDashboard />
                         </ProtectedRoute>
                       }
-                    /> */}
+                    />
             </Routes>
             
           </main>
