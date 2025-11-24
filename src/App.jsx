@@ -6,6 +6,7 @@ import Marketplace from "./pages/marketplace";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./context/ProtectedRoute";
 
 function App() {
   return (
@@ -19,7 +20,24 @@ function App() {
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              {/* <Route
+                      path="/additem"
+                      element={
+                        <ProtectedRoute>
+                          <AddItem />
+                        </ProtectedRoute>
+                      }
+                    />
+              <Route
+                      path="/profile"
+                      element={
+                        <ProtectedRoute>
+                          <UserDashboard />
+                        </ProtectedRoute>
+                      }
+                    /> */}
             </Routes>
+            
           </main>
           <Footer />
         </div>
