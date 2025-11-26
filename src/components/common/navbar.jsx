@@ -1,7 +1,18 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
+import { supabase } from "../../lib/supabaseClient";
 
 const Navbar = () => {
+  const { user, setUser } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    navigate("/");
+  };
+
   return (
     <motion.nav
       initial={{ y: -80, opacity: 0 }}
@@ -26,17 +37,40 @@ const Navbar = () => {
       </ul>
 
       {/* Buttons */}
-      <div className="space-x-4 hidden md:flex">
-        <Link to="/login">
-          <button className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-md rounded-lg transition-all hover:scale-105">
-            Login
-          </button>
-        </Link>
-        <Link to="/signup">
-          <button className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-md rounded-lg transition-all hover:scale-105">
-            Sign Up
-          </button>
-        </Link>
+      <div className="space-x-4 hidden md:flex items-center">
+        {user ? (
+          <>
+            <Link to="/profile">
+              <button className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-md rounded-lg transition-all hover:scale-105">
+                Profile
+              </button>
+            </Link>
+            <Link to="/additem">
+              <button className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-md rounded-lg transition-all hover:scale-105">
+                Sell Item
+              </button>
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md rounded-lg transition-all hover:scale-105"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">
+              <button className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-md rounded-lg transition-all hover:scale-105">
+                Login
+              </button>
+            </Link>
+            <Link to="/signup">
+              <button className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-md rounded-lg transition-all hover:scale-105">
+                Sign Up
+              </button>
+            </Link>
+          </>
+        )}
       </div>
     </motion.nav>
   );
