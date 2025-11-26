@@ -1,6 +1,19 @@
 import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleSellItem = () => {
+    if (user) {
+      navigate("/additem");
+    } else {
+      navigate("/login");
+    }
+  };
+
   return (
     <section className="relative bg-gradient-to-br from-blue-950 via-amber-900 to-yellow-700 text-white py-28 px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto text-center">
@@ -29,10 +42,15 @@ const HeroSection = () => {
           transition={{ delay: 0.8, duration: 1 }}
           className="flex flex-col sm:flex-row gap-6 justify-center"
         >
-          <button className="bg-amber-600 hover:bg-amber-700 px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
-            Explore Auctions
-          </button>
-          <button className="bg-blue-900 hover:bg-blue-800 border border-amber-500 px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 hover:scale-105">
+          <Link to="/marketplace">
+            <button className="bg-amber-600 hover:bg-amber-700 px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+              Explore Auctions
+            </button>
+          </Link>
+          <button
+            onClick={handleSellItem}
+            className="bg-blue-900 hover:bg-blue-800 border border-amber-500 px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 hover:scale-105"
+          >
             Sell an Item
           </button>
         </motion.div>
