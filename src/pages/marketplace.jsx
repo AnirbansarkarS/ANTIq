@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import AuctionCard from "../components/common/AuctionCard";
-import { supabase } from "../lib/supabaseClient";
+import { getActiveItems } from "../lib/database";
 
 const Marketplace = () => {
   const [auctionItems, setAuctionItems] = useState([]);
@@ -14,12 +14,7 @@ const Marketplace = () => {
 
   const fetchItems = async () => {
     try {
-      const { data, error } = await supabase
-        .from("items")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
+      const data = await getActiveItems();
 
       // Transform data to match AuctionCard format
       const transformedItems = (data || []).map((item) => ({
@@ -27,9 +22,10 @@ const Marketplace = () => {
         title: item.title,
         description: item.description || "",
         currentBid: item.price || 0,
-        bidCount: 0, // You can fetch this from bids table if needed
-        endTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-        image: item.image || "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.1.0&auto=format&fit=crop&w=600&q=80",
+        bidCount: 0, // Will be populated from bids in future
+        endTime: item.auction_end_time ? new Date(item.auction_end_time) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        image: item.image_url || "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.1.0&auto=format&fit=crop&w=600&q=80",
+        owner: item.owner,
       }));
 
       setAuctionItems(transformedItems);

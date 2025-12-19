@@ -25,8 +25,11 @@ export default function AddItem() {
         title,
         description: desc,
         price: parseFloat(price),
-        image: image || "https://images.unsplash.com/photo-1549880338-65ddcdfd017b?w=800&q=60",
-        user_id: user.id,
+        image_url: image || "https://images.unsplash.com/photo-1549880338-65ddcdfd017b?w=800&q=60",
+        owner_id: user.id,
+        status: 'active',
+        listing_type: 'fixed',
+        category: 'Antiques', // Default category
       },
     ]);
 
@@ -60,11 +63,10 @@ export default function AddItem() {
 
           {message && (
             <div
-              className={`mb-6 px-4 py-3 rounded-lg ${
-                message.includes("successfully")
+              className={`mb-6 px-4 py-3 rounded-lg ${message.includes("successfully")
                   ? "bg-green-100 border border-green-400 text-green-700"
                   : "bg-red-100 border border-red-400 text-red-700"
-              }`}
+                }`}
             >
               {message}
             </div>

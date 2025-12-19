@@ -3,31 +3,32 @@ import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { getUserStats, getUserItems } from "../lib/database";
 
 export default function UserDashboard() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [myItems, setMyItems] = useState([]);
+  const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
-      fetchMyItems();
+      fetchUserData();
     }
   }, [user]);
 
-  const fetchMyItems = async () => {
+  const fetchUserData = async () => {
     try {
-      const { data, error } = await supabase
-        .from("items")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+      const [items, stats] = await Promise.all([
+        getUserItems(user.id, 'active'),
+        getUserStats(user.id)
+      ]);
 
-      if (error) throw error;
-      setMyItems(data || []);
+      setMyItems(items || []);
+      setUserStats(stats);
     } catch (err) {
-      console.error("Error fetching items:", err);
+      console.error("Error fetching user data:", err);
     } finally {
       setLoading(false);
     }
@@ -65,15 +66,15 @@ export default function UserDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-gradient-to-br from-amber-100 to-amber-200 p-6 rounded-xl border border-amber-300">
-              <h3 className="text-2xl font-bold text-amber-900">{myItems.length}</h3>
+              <h3 className="text-2xl font-bold text-amber-900">{userStats?.active_listings || 0}</h3>
               <p className="text-amber-800 font-semibold">Items Listed</p>
             </div>
             <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-6 rounded-xl border border-blue-300">
-              <h3 className="text-2xl font-bold text-blue-900">0</h3>
+              <h3 className="text-2xl font-bold text-blue-900">{userStats?.active_bids || 0}</h3>
               <p className="text-blue-800 font-semibold">Active Bids</p>
             </div>
             <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 p-6 rounded-xl border border-yellow-300">
-              <h3 className="text-2xl font-bold text-yellow-900">0</h3>
+              <h3 className="text-2xl font-bold text-yellow-900">${userStats?.total_sales_amount?.toLocaleString() || '0'}</h3>
               <p className="text-yellow-800 font-semibold">Total Sales</p>
             </div>
           </div>
@@ -117,7 +118,7 @@ export default function UserDashboard() {
                   className="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200 hover:border-amber-400 transition-all duration-300 transform hover:scale-105"
                 >
                   <img
-                    src={item.image || "https://images.unsplash.com/photo-1549880338-65ddcdfd017b?w=800&q=60"}
+                    src={item.image_url || "https://images.unsplash.com/photo-1549880338-65ddcdfd017b?w=800&q=60"}
                     alt={item.title}
                     className="w-full h-48 object-cover"
                   />
