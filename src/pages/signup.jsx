@@ -29,18 +29,37 @@ export default function Signup() {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
 
-    setLoading(false);
-
     if (error) {
       setError(error.message);
-    } else {
-      navigate("/login"); // redirect to login
+      setLoading(false);
+      return;
     }
+
+    // Create user profile in database
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: data.user.id,
+          email: data.user.email,
+          name: email.split('@')[0], // Use email prefix as default name
+        });
+
+      if (profileError) {
+        console.error("Error creating profile:", profileError);
+        setError("Account created but profile setup failed. Please contact support.");
+        setLoading(false);
+        return;
+      }
+    }
+
+    setLoading(false);
+    navigate("/login"); // redirect to login
   };
 
   return (

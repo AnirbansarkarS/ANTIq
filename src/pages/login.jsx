@@ -23,14 +23,40 @@ export default function Login() {
       password,
     });
 
-    setLoading(false);
-
     if (error) {
       setError(error.message);
-    } else {
-      setUser(data.user); // storing user globally in AuthContext
-      navigate("/profile"); // go to dashboard
+      setLoading(false);
+      return;
     }
+
+    // Ensure user profile exists in database
+    if (data.user) {
+      const { data: profile, error: profileError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', data.user.id)
+        .single();
+
+      // If profile doesn't exist, create it
+      if (profileError || !profile) {
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert({
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.email.split('@')[0],
+          });
+
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+        }
+      }
+
+      setUser(data.user);
+      navigate("/profile");
+    }
+
+    setLoading(false);
   };
 
   return (
