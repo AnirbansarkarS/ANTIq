@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { supabase } from "../lib/supabaseClient";
-import { useAuth } from "../context/AuthContext";
+import { supabase } from "../lib/supabaseclient";
 import { getItemById, closeAuction } from "../lib/database";
 import BidPanel from "../components/auction/BidPanel";
 import AuctionTimer from "../components/auction/AuctionTimer";
@@ -11,7 +10,6 @@ import { useAuction } from "../hooks/useAuction";
 const ItemDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [winner, setWinner] = useState(null);

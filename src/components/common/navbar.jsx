@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { supabase } from "../../lib/supabaseClient";
+import { supabase } from "../../lib/supabaseclient";
 
 const Navbar = () => {
   const { user, setUser } = useAuth();
