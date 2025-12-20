@@ -1,144 +1,238 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { createItem } from "../lib/database";
 
 export default function AddItem() {
   const { user } = useAuth();
   const navigate = useNavigate();
-
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
-  const [price, setPrice] = useState("");
-  const [image, setImage] = useState("");
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleAdd = async (e) => {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    price: "",
+    image_url: "",
+    auction_end_time: "",
+    category: "Artifacts",
+    condition: "Exquisite",
+    year: "",
+    origin: ""
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!user) return setError("Login required to list artifacts.");
     setLoading(true);
-    setMessage("");
+    setError("");
 
-    const { error } = await supabase.from("items").insert([
-      {
-        title,
-        description: desc,
-        price: parseFloat(price),
-        image_url: image || "https://images.unsplash.com/photo-1549880338-65ddcdfd017b?w=800&q=60",
-        owner_id: user.id,
-        status: 'active',
-        listing_type: 'fixed',
-        category: 'Antiques', // Default category
-      },
-    ]);
+    try {
+      const newItem = await createItem({
+        ...formData,
+        seller_id: user.id,
+        price: parseFloat(formData.price) || 0,
+        auction_end_time: formData.auction_end_time ? new Date(formData.auction_end_time).toISOString() : null
+      });
 
-    setLoading(false);
-
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage("Item added successfully! Redirecting...");
-      setTimeout(() => {
-        navigate("/marketplace");
-      }, 1500);
+      if (newItem) {
+        navigate(`/auction/${newItem.id}`);
+      }
+    } catch (err) {
+      console.error("Error creating item:", err);
+      setError("Failed to seal the listing. Please verify your credentials.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-950 via-amber-900 to-yellow-700 py-12 px-6">
-      <div className="max-w-2xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border-2 border-amber-300"
+    <div className="min-h-screen py-16 transition-colors duration-500">
+      <div className="max-w-5xl mx-auto px-8">
+        <motion.button
+          whileHover={{ x: -8 }}
+          onClick={() => navigate(-1)}
+          className="text-xs uppercase tracking-[0.3em] font-black flex items-center gap-3 mb-10 opacity-60 hover:opacity-100 transition-all"
+          style={{ color: 'var(--text-primary)' }}
         >
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-serif font-bold text-amber-900 mb-2">
-              List Your Antique
-            </h1>
-            <p className="text-gray-600">Share your rare collectible with collectors worldwide</p>
+          ← Return to Marketplace
+        </motion.button>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card-base p-12 relative overflow-hidden"
+        >
+          {/* Ornate corner decoration */}
+          <div className="absolute top-0 right-0 w-48 h-48 opacity-[0.03] pointer-events-none rotate-12">
+            <svg viewBox="0 0 100 100" className="w-full h-full" style={{ fill: 'var(--accent-primary)' }}>
+              <path d="M50,0 Q100,0 100,50 Q100,100 50,100 Q0,100 0,50 Q0,0 50,0" />
+            </svg>
           </div>
 
-          {message && (
-            <div
-              className={`mb-6 px-4 py-3 rounded-lg ${message.includes("successfully")
-                  ? "bg-green-100 border border-green-400 text-green-700"
-                  : "bg-red-100 border border-red-400 text-red-700"
-                }`}
-            >
-              {message}
+          <div className="relative z-10 mb-12">
+            <h1 className="text-5xl md:text-7xl font-serif font-black mb-4 italic tracking-tighter" style={{ color: 'var(--text-primary)' }}>
+              Catalog New Artifact
+            </h1>
+            <p className="text-xl font-serif italic opacity-60" style={{ color: 'var(--text-primary)' }}>
+              Document the provenance and details of your historic treasure.
+            </p>
+          </div>
+
+          {error && (
+            <div className="mb-8 p-5 border-2 rounded-2xl font-bold text-sm"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--status-error), transparent 90%)',
+                borderColor: 'color-mix(in srgb, var(--status-error), transparent 70%)',
+                color: 'var(--status-error)'
+              }}>
+              ⚠️ {error}
             </div>
           )}
 
-          <form onSubmit={handleAdd} className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-2">
-                Item Title *
-              </label>
-              <input
-                type="text"
-                placeholder="e.g., Victorian Pocket Watch"
-                className="w-full p-3 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-amber-50 text-amber-900 placeholder-gray-400"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
+          <form onSubmit={handleSubmit} className="space-y-10 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Title */}
+              <div className="md:col-span-2 space-y-3">
+                <label className="text-[10px] uppercase tracking-[0.4em] font-black opacity-40 ml-1" style={{ color: 'var(--text-primary)' }}>
+                  Artifact Title *
+                </label>
+                <input
+                  name="title"
+                  required
+                  placeholder="e.g., 18th Century Nautical Compass"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className="input-field text-xl font-medium placeholder:opacity-30"
+                />
+              </div>
+
+              {/* Description */}
+              <div className="md:col-span-2 space-y-3">
+                <label className="text-[10px] uppercase tracking-[0.4em] font-black opacity-40 ml-1" style={{ color: 'var(--text-primary)' }}>
+                  Description & Provenance
+                </label>
+                <textarea
+                  name="description"
+                  placeholder="Detailed history and features..."
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows="4"
+                  className="input-field text-lg font-medium placeholder:opacity-30 resize-none"
+                />
+              </div>
+
+              {/* Price */}
+              <div className="space-y-3">
+                <label className="text-[10px] uppercase tracking-[0.4em] font-black opacity-40 ml-1" style={{ color: 'var(--text-primary)' }}>
+                  Opening Valuation ($)
+                </label>
+                <input
+                  name="price"
+                  type="number"
+                  required
+                  placeholder="500"
+                  value={formData.price}
+                  onChange={handleChange}
+                  className="input-field text-xl font-black font-serif"
+                />
+              </div>
+
+              {/* Category */}
+              <div className="space-y-3">
+                <label className="text-[10px] uppercase tracking-[0.4em] font-black opacity-40 ml-1" style={{ color: 'var(--text-primary)' }}>
+                  Collection Category
+                </label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="input-field text-lg font-bold appearance-none"
+                >
+                  <option value="Artifacts">Artifacts</option>
+                  <option value="Documents">Documents</option>
+                  <option value="ArtPieces">Art Pieces</option>
+                  <option value="Jewelry">Jewelry</option>
+                  <option value="Furniture">Furniture</option>
+                </select>
+              </div>
+
+              {/* Meta Info */}
+              <div className="grid grid-cols-2 gap-6 md:col-span-2">
+                <div className="space-y-3">
+                  <label className="text-[10px] uppercase tracking-[0.4em] font-black opacity-40 ml-1" style={{ color: 'var(--text-primary)' }}>
+                    Period/Year
+                  </label>
+                  <input
+                    name="year"
+                    placeholder="e.g. 1750s"
+                    value={formData.year}
+                    onChange={handleChange}
+                    className="input-field text-lg font-medium placeholder:opacity-30"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] uppercase tracking-[0.4em] font-black opacity-40 ml-1" style={{ color: 'var(--text-primary)' }}>
+                    Origin
+                  </label>
+                  <input
+                    name="origin"
+                    placeholder="e.g. France"
+                    value={formData.origin}
+                    onChange={handleChange}
+                    className="input-field text-lg font-medium placeholder:opacity-30"
+                  />
+                </div>
+              </div>
+
+              {/* Image URL */}
+              <div className="md:col-span-2 space-y-3">
+                <label className="text-[10px] uppercase tracking-[0.4em] font-black opacity-40 ml-1" style={{ color: 'var(--text-primary)' }}>
+                  Provenance Visualization (Image URL)
+                </label>
+                <input
+                  name="image_url"
+                  type="url"
+                  placeholder="https://..."
+                  value={formData.image_url}
+                  onChange={handleChange}
+                  className="input-field text-sm font-medium placeholder:opacity-30"
+                />
+              </div>
+
+              {/* End Time */}
+              <div className="md:col-span-2 space-y-3">
+                <label className="text-[10px] uppercase tracking-[0.4em] font-black opacity-40 ml-1" style={{ color: 'var(--text-primary)' }}>
+                  Acquisition Finalization Range (End Date)
+                </label>
+                <input
+                  name="auction_end_time"
+                  type="datetime-local"
+                  value={formData.auction_end_time}
+                  onChange={handleChange}
+                  className="input-field text-lg font-bold"
+                />
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 ml-1">
+                  Leave empty for 7-day standard duration
+                </p>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-2">
-                Description
-              </label>
-              <textarea
-                placeholder="Describe your item in detail..."
-                rows="5"
-                className="w-full p-3 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-amber-50 text-amber-900 placeholder-gray-400 resize-none"
-                value={desc}
-                onChange={(e) => setDesc(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-2">
-                Starting Price ($) *
-              </label>
-              <input
-                type="number"
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                className="w-full p-3 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-amber-50 text-amber-900 placeholder-gray-400"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-2">
-                Image URL
-              </label>
-              <input
-                type="url"
-                placeholder="https://example.com/image.jpg"
-                className="w-full p-3 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-amber-50 text-amber-900 placeholder-gray-400"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Leave empty to use default image
-              </p>
-            </div>
-
-            <button
-              type="submit"
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full py-6 rounded-[1.5rem] font-bold text-2xl uppercase tracking-[0.3em] shadow-xl transition-all disabled:opacity-50 group relative overflow-hidden"
             >
-              {loading ? "Adding Item..." : "List Item for Auction"}
-            </button>
+              <span className="relative z-10">{loading ? "SEALING RECORDS..." : "SEAL LISTING 📜"}</span>
+              <div className="absolute inset-x-0 h-full w-32 bg-white/20 -skew-x-12 -translate-x-full group-hover:translate-x-[500%] transition-transform duration-1000" />
+            </motion.button>
           </form>
         </motion.div>
       </div>

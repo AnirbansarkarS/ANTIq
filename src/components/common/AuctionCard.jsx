@@ -1,104 +1,184 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import AuctionTimer from "../auction/AuctionTimer";
 
 const AuctionCard = ({ item }) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+
   const auctionItem = item || {
     id: 1,
     title: "Roman Empire Coin Collection",
     description: "Authentic Roman coins from 1st century AD in excellent condition.",
     currentBid: 2450,
     bidCount: 12,
-    endTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+    endTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
     image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.1.0&auto=format&fit=crop&w=600&q=80"
   };
 
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-
-  function calculateTimeLeft() {
-    const difference = auctionItem.endTime - new Date();
-    if (difference <= 0) return "Auction Ended";
-
-    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-    
-    return `${days}d ${hours}h left`;
-  }
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 60000); // Update every minute
-
-    return () => clearInterval(timer);
-  }, []);
-
-  const handleBid = (e) => {
+  const handleFavorite = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log(`Bidding on item: ${auctionItem.id}`);
-    // Add your bid logic here
+    setIsFavorite(!isFavorite);
   };
 
   return (
-    <div className="bg-white w-80 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-amber-200 hover:border-amber-400 cursor-pointer">
-      <div className="relative">
-        <img
-          src={auctionItem.image}
-          alt={auctionItem.title}
-          className="w-full h-52 object-cover"
-          onError={(e) => {
-            e.target.src = "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.1.0&auto=format&fit=crop&w=600&q=80";
-          }}
-        />
-        <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold ${
-          timeLeft === "Auction Ended" 
-            ? "bg-red-600 text-white" 
-            : "bg-amber-600 text-white"
-        }`}>
-          {timeLeft}
+    <Link to={`/auction/${auctionItem.id}`}>
+      <motion.div
+        whileHover={{ y: -8, scale: 1.02 }}
+        transition={{ duration: 0.3 }}
+        className="card-base relative overflow-hidden rounded-2xl shadow-premium cursor-pointer group"
+      >
+        {/* Ornate Corner Decorations */}
+        <div className="absolute top-0 left-0 w-16 h-16 opacity-30 pointer-events-none z-10">
+          <svg viewBox="0 0 100 100" className="w-full h-full" style={{ fill: 'var(--accent-primary)' }}>
+            <path d="M0,0 L100,0 L100,20 Q50,40 0,20 Z" />
+            <path d="M0,0 L20,0 L20,100 Q40,50 20,0 Z" />
+          </svg>
         </div>
-      </div>
+        <div className="absolute top-0 right-0 w-16 h-16 opacity-30 pointer-events-none z-10 transform rotate-90">
+          <svg viewBox="0 0 100 100" className="w-full h-full" style={{ fill: 'var(--accent-primary)' }}>
+            <path d="M0,0 L100,0 L100,20 Q50,40 0,20 Z" />
+            <path d="M0,0 L20,0 L20,100 Q40,50 20,0 Z" />
+          </svg>
+        </div>
 
-      <div className="p-5">
-        <h3 className="text-xl font-bold text-amber-900 mb-2 font-serif">
-          {auctionItem.title}
-        </h3>
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-          {auctionItem.description}
-        </p>
+        {/* Image Section */}
+        <div className="relative overflow-hidden">
+          <img
+            src={auctionItem.image}
+            alt={auctionItem.title}
+            className="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-110"
+            onError={(e) => {
+              e.target.src = "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.1.0&auto=format&fit=crop&w=600&q=80";
+            }}
+          />
 
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Current Bid</p>
-            <p className="text-2xl font-bold text-amber-700">${auctionItem.currentBid.toLocaleString()}</p>
+          {/* Gradient Overlay */}
+          <div
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{
+              background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)'
+            }}
+          />
+
+          {/* Auction Timer Badge */}
+          <div className="absolute top-3 right-3 z-20">
+            <AuctionTimer endTime={auctionItem.endTime} size="sm" showLabel={false} />
           </div>
-          <div className="text-right">
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Bids</p>
-            <p className="text-lg font-semibold text-amber-900">{auctionItem.bidCount}</p>
+
+          {/* Favorite Button */}
+          <motion.button
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleFavorite}
+            className="absolute top-3 left-3 z-20 p-2 rounded-full backdrop-blur-md transition-all duration-300"
+            style={{
+              background: isFavorite ? 'var(--accent-primary)' : 'rgba(255, 255, 255, 0.3)',
+              border: '2px solid var(--border-accent)'
+            }}
+          >
+            <span className="text-xl">
+              {isFavorite ? '❤️' : '🤍'}
+            </span>
+          </motion.button>
+        </div>
+
+        {/* Content Section */}
+        <div className="p-5 space-y-4">
+          {/* Title */}
+          <h3
+            className="text-xl font-bold font-serif line-clamp-2 min-h-[3.5rem]"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {auctionItem.title}
+          </h3>
+
+          {/* Description */}
+          <p
+            className="text-sm line-clamp-2 min-h-[2.5rem]"
+            style={{ color: 'var(--text-secondary)' }}
+          >
+            {auctionItem.description}
+          </p>
+
+          {/* Bid Info */}
+          <div
+            className="flex items-center justify-between p-3 rounded-lg"
+            style={{
+              background: 'var(--bg-hover)',
+              border: '1px solid var(--border-primary)'
+            }}
+          >
+            <div>
+              <p
+                className="text-xs uppercase tracking-wide font-semibold mb-1"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                Current Bid
+              </p>
+              <p
+                className="text-2xl font-bold font-serif"
+                style={{ color: 'var(--accent-primary)' }}
+              >
+                ${auctionItem.currentBid.toLocaleString()}
+              </p>
+            </div>
+            <div className="text-right">
+              <p
+                className="text-xs uppercase tracking-wide font-semibold mb-1"
+                style={{ color: 'var(--text-tertiary)' }}
+              >
+                Bids
+              </p>
+              <p
+                className="text-lg font-bold"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {auctionItem.bidCount || 0}
+              </p>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex-1 py-3 rounded-lg font-bold text-sm uppercase tracking-wide transition-all duration-300 shadow-md"
+              style={{
+                background: 'var(--gradient-gold)',
+                color: 'var(--bg-primary)'
+              }}
+            >
+              View Details
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Handle quick bid
+              }}
+              className="px-5 py-3 rounded-lg font-bold text-sm uppercase tracking-wide transition-all duration-300 shadow-md"
+              style={{
+                background: 'var(--bg-card)',
+                color: 'var(--text-primary)',
+                border: '2px solid var(--accent-primary)'
+              }}
+            >
+              💰
+            </motion.button>
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <Link 
-            to={`/auction/${auctionItem.id}`}
-            className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-center py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
-          >
-            View Details
-          </Link>
-          <button 
-            onClick={handleBid}
-            disabled={timeLeft === "Auction Ended"}
-            className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-all duration-300 border ${
-              timeLeft === "Auction Ended"
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed border-gray-400"
-                : "bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300 hover:scale-105"
-            }`}
-          >
-            {timeLeft === "Auction Ended" ? "Ended" : "Bid Now"}
-          </button>
+        {/* Shimmer Effect on Hover */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-500">
+          <div className="absolute inset-0 animate-shimmer" />
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </Link>
   );
 };
 

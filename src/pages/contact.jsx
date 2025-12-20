@@ -29,7 +29,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fbf7ed] py-12">
+    <div className="min-h-screen py-12 transition-colors duration-500">
       <div className="max-w-6xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -37,10 +37,10 @@ const Contact = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h1 className="text-5xl font-serif font-bold text-amber-900 mb-4">
+          <h1 className="text-5xl font-serif font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             Contact Us
           </h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+          <p className="text-xl max-w-3xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
             Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </p>
         </motion.div>
@@ -52,44 +52,44 @@ const Contact = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="space-y-8"
           >
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-amber-200">
-              <h2 className="text-2xl font-serif font-bold text-amber-900 mb-4">
+            <div className="card-base p-6">
+              <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                 Get in Touch
               </h2>
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="text-2xl">📧</div>
                   <div>
-                    <h3 className="font-semibold text-amber-900 mb-1">Email</h3>
-                    <p className="text-gray-700">support@antiq.com</p>
+                    <h3 className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Email</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>anirbansr07@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="text-2xl">📞</div>
                   <div>
-                    <h3 className="font-semibold text-amber-900 mb-1">Phone</h3>
-                    <p className="text-gray-700">+1 (555) 123-4567</p>
+                    <h3 className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Phone</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>+91  98315 07833</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="text-2xl">📍</div>
                   <div>
-                    <h3 className="font-semibold text-amber-900 mb-1">Address</h3>
-                    <p className="text-gray-700">
-                      123 Antique Street<br />
-                      Collector's District<br />
-                      New York, NY 10001
+                    <h3 className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Address</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>
+                      Techno India University,<br />
+                      Salt Lake Sector V<br />
+                      Kolkata, West Bengal, India - 700091
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl shadow-lg p-6 border-2 border-amber-300">
-              <h3 className="text-xl font-serif font-bold text-amber-900 mb-4">
+            <div className="card-base p-6">
+              <h3 className="text-xl font-serif font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
                 Business Hours
               </h3>
-              <div className="space-y-2 text-gray-700">
+              <div className="space-y-2" style={{ color: 'var(--text-secondary)' }}>
                 <p><span className="font-semibold">Monday - Friday:</span> 9:00 AM - 6:00 PM</p>
                 <p><span className="font-semibold">Saturday:</span> 10:00 AM - 4:00 PM</p>
                 <p><span className="font-semibold">Sunday:</span> Closed</p>
@@ -101,21 +101,21 @@ const Contact = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="bg-white rounded-xl shadow-lg p-8 border border-amber-200"
+            className="card-base p-8"
           >
-            <h2 className="text-2xl font-serif font-bold text-amber-900 mb-6">
+            <h2 className="text-2xl font-serif font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
               Send us a Message
             </h2>
 
             {submitted && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 px-4 py-3 rounded-lg mb-6 font-bold">
                 Thank you for your message! We'll get back to you soon.
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-amber-900 mb-2">
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
                   Your Name *
                 </label>
                 <input
@@ -124,13 +124,13 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full p-3 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-amber-50 text-amber-900 placeholder-gray-400"
+                  className="input-field"
                   placeholder="John Doe"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-amber-900 mb-2">
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
                   Email Address *
                 </label>
                 <input
@@ -139,13 +139,13 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full p-3 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-amber-50 text-amber-900 placeholder-gray-400"
+                  className="input-field"
                   placeholder="john@example.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-amber-900 mb-2">
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
                   Subject *
                 </label>
                 <input
@@ -154,13 +154,13 @@ const Contact = () => {
                   value={formData.subject}
                   onChange={handleChange}
                   required
-                  className="w-full p-3 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-amber-50 text-amber-900 placeholder-gray-400"
+                  className="input-field"
                   placeholder="How can we help?"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-amber-900 mb-2">
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
                   Message *
                 </label>
                 <textarea
@@ -169,14 +169,14 @@ const Contact = () => {
                   onChange={handleChange}
                   required
                   rows="6"
-                  className="w-full p-3 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-amber-50 text-amber-900 placeholder-gray-400 resize-none"
+                  className="input-field resize-none"
                   placeholder="Tell us more about your inquiry..."
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="btn-primary w-full text-lg"
               >
                 Send Message
               </button>

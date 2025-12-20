@@ -63,35 +63,40 @@ export default function Signup() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-950 via-amber-900 to-yellow-700 py-12 px-6">
+    <div className="flex justify-center items-center min-h-screen py-12 px-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="w-full max-w-md"
       >
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border-2 border-amber-300">
+        <div className="card-base p-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-serif font-bold text-amber-900 mb-2">ANTIQ</h1>
-            <h2 className="text-2xl font-serif text-amber-800">Create Account</h2>
-            <p className="text-gray-600 mt-2">Join our community of collectors</p>
+            <h1 className="text-4xl font-serif font-bold mb-2" style={{ color: 'var(--text-primary)' }}>ANTIQ</h1>
+            <h2 className="text-2xl font-serif" style={{ color: 'var(--text-secondary)' }}>Create Account</h2>
+            <p className="mt-2" style={{ color: 'var(--text-tertiary)' }}>Join our community of collectors</p>
           </div>
 
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
-              {error}
+            <div className="mb-8 p-5 border-2 rounded-2xl font-bold text-sm"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--status-error), transparent 90%)',
+                borderColor: 'color-mix(in srgb, var(--status-error), transparent 70%)',
+                color: 'var(--status-error)'
+              }}>
+              ⚠️ {error}
             </div>
           )}
 
           <form onSubmit={handleSignup} className="space-y-5">
             <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
                 Email Address
               </label>
               <input
                 type="email"
                 placeholder="your.email@example.com"
-                className="w-full p-3 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-amber-50 text-amber-900 placeholder-gray-400"
+                className="input-field"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -99,13 +104,13 @@ export default function Signup() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
                 Password
               </label>
               <input
                 type="password"
                 placeholder="Create a password (min. 6 characters)"
-                className="w-full p-3 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-amber-50 text-amber-900 placeholder-gray-400"
+                className="input-field"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -113,13 +118,13 @@ export default function Signup() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
                 Confirm Password
               </label>
               <input
                 type="password"
                 placeholder="Confirm your password"
-                className="w-full p-3 rounded-lg border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-amber-50 text-amber-900 placeholder-gray-400"
+                className="input-field"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -129,16 +134,16 @@ export default function Signup() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white py-3 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Creating Account..." : "Sign Up"}
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p style={{ color: 'var(--text-tertiary)' }}>
               Already have an account?{" "}
-              <Link to="/login" className="text-amber-700 hover:text-amber-900 font-semibold">
+              <Link to="/login" className="font-semibold hover:underline" style={{ color: 'var(--text-accent)' }}>
                 Sign In
               </Link>
             </p>
