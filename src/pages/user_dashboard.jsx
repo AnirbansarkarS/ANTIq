@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getUserStats, getUserItems } from "../lib/database";
+import AuctionCard from "../components/common/AuctionCard";
 
 export default function UserDashboard() {
   const { user, setUser } = useAuth();
@@ -11,6 +12,7 @@ export default function UserDashboard() {
   const [myItems, setMyItems] = useState([]);
   const [userStats, setUserStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("listings");
 
   useEffect(() => {
     if (user) {
@@ -25,7 +27,18 @@ export default function UserDashboard() {
         getUserStats(user.id)
       ]);
 
-      setMyItems(items || []);
+      // Transform raw items to satisfy AuctionCard format
+      const transformedItems = (items || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        currentBid: item.price || 0,
+        bidCount: 0,
+        endTime: item.auction_end_time ? new Date(item.auction_end_time) : new Date(Date.now() + 86400000),
+        image: item.image_url
+      }));
+
+      setMyItems(transformedItems);
       setUserStats(stats);
     } catch (err) {
       console.error("Error fetching user data:", err);
@@ -41,104 +54,161 @@ export default function UserDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-950 via-amber-900 to-yellow-700 py-12 px-6">
+    <div className="min-h-screen py-16 px-8 transition-colors duration-500">
       <div className="max-w-7xl mx-auto">
+        {/* Profile Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border-2 border-amber-300 mb-8"
+          transition={{ duration: 0.8 }}
+          className="card-base mb-12 relative overflow-hidden rounded-[3rem] p-12"
         >
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-            <div>
-              <h1 className="text-4xl font-serif font-bold text-amber-900 mb-2">
-                Welcome Back!
-              </h1>
-              <p className="text-gray-600 text-lg">{user?.email}</p>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="mt-4 md:mt-0 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
-            >
-              Logout
-            </button>
+          {/* Decorative Background */}
+          <div className="absolute top-0 right-0 w-80 h-80 opacity-[0.03] pointer-events-none -rotate-12">
+            <svg viewBox="0 0 100 100" className="w-full h-full" style={{ fill: 'var(--accent-primary)' }}>
+              <path d="M50,0 Q100,0 100,50 Q100,100 50,100 Q0,100 0,50 Q0,0 50,0" />
+            </svg>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-amber-100 to-amber-200 p-6 rounded-xl border border-amber-300">
-              <h3 className="text-2xl font-bold text-amber-900">{userStats?.active_listings || 0}</h3>
-              <p className="text-amber-800 font-semibold">Items Listed</p>
+          <div className="flex flex-col lg:row justify-between items-start lg:items-center relative z-10 gap-10">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="w-32 h-32 rounded-full border-4 overflow-hidden shadow-xl"
+                style={{ borderColor: 'var(--accent-primary)' }}>
+                <img src={`https://i.pravatar.cc/150?u=${user?.id}`} alt="profile" className="w-full h-full object-cover" />
+              </div>
+              <div className="text-center md:text-left">
+                <h1 className="text-5xl md:text-6xl font-serif font-black mb-2 tracking-tighter italic" style={{ color: 'var(--text-primary)' }}>
+                  Collector Portfolio
+                </h1>
+                <p className="text-lg font-serif italic opacity-60" style={{ color: 'var(--text-primary)' }}>
+                  {user?.email}
+                </p>
+                <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+                  <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm"
+                    style={{ background: 'var(--bg-hover)', color: 'var(--text-accent)', borderColor: 'var(--border-primary)' }}>
+                    Verified Purveyor
+                  </span>
+                  <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm"
+                    style={{ background: 'var(--bg-hover)', color: 'var(--text-primary)', borderColor: 'var(--border-secondary)' }}>
+                    Grand Merchant
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-6 rounded-xl border border-blue-300">
-              <h3 className="text-2xl font-bold text-blue-900">{userStats?.active_bids || 0}</h3>
-              <p className="text-blue-800 font-semibold">Active Bids</p>
-            </div>
-            <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 p-6 rounded-xl border border-yellow-300">
-              <h3 className="text-2xl font-bold text-yellow-900">${userStats?.total_sales_amount?.toLocaleString() || '0'}</h3>
-              <p className="text-yellow-800 font-semibold">Total Sales</p>
-            </div>
-          </div>
 
-          <Link to="/additem">
-            <button className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg mb-6">
-              + Add New Auction Item
-            </button>
-          </Link>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border-2 border-amber-300"
-        >
-          <h2 className="text-3xl font-serif font-bold text-amber-900 mb-6">
-            My Listed Items
-          </h2>
-
-          {loading ? (
-            <div className="text-center py-12">
-              <p className="text-amber-900 text-lg">Loading...</p>
-            </div>
-          ) : myItems.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600 text-lg mb-4">You haven't listed any items yet.</p>
-              <Link to="/additem">
-                <button className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105">
-                  List Your First Item
-                </button>
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {myItems.map((item) => (
-                <Link
-                  key={item.id}
-                  to={`/auction/${item.id}`}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden border border-amber-200 hover:border-amber-400 transition-all duration-300 transform hover:scale-105"
+            <div className="flex gap-5 w-full lg:w-auto">
+              <Link to="/additem" className="flex-1 lg:flex-none">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="btn-primary w-full text-xs tracking-[0.2em] px-8 py-4 rounded-[1.5rem]"
                 >
-                  <img
-                    src={item.image_url || "https://images.unsplash.com/photo-1549880338-65ddcdfd017b?w=800&q=60"}
-                    alt={item.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-4">
-                    <h3 className="text-xl font-serif font-bold text-amber-900 mb-2 line-clamp-1">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                      {item.description}
-                    </p>
-                    <p className="text-2xl font-bold text-amber-700">
-                      ${(item.price || 0).toLocaleString()}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+                  + New Auction
+                </motion.button>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="px-8 py-4 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] transition-all border shadow-premium flex-1 lg:flex-none card-base"
+                style={{
+                  color: 'var(--text-primary)',
+                  padding: '1rem 2rem'
+                }}
+              >
+                Exit Gallery
+              </button>
             </div>
-          )}
+          </div>
+
+          {/* Performance Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mt-16 relative z-10">
+            {[
+              { label: "Active Listings", value: userStats?.active_listings || 0, color: 'var(--accent-primary)' },
+              { label: "Current Bids", value: userStats?.active_bids || 0, color: 'var(--accent-secondary)' },
+              { label: "Total Revenue", value: `$${(userStats?.total_sales_amount || 0).toLocaleString()}`, color: 'var(--accent-primary)' },
+              { label: "Trust Index", value: "99.2%", color: 'var(--text-accent)' }
+            ].map((stat, i) => (
+              <div key={i} className="card-base p-6 rounded-3xl flex flex-col justify-center items-center text-center">
+                <p className="text-[10px] uppercase tracking-widest mb-2 font-black opacity-60" style={{ color: 'var(--text-primary)' }}>{stat.label}</p>
+                <p className="text-3xl font-serif font-black tracking-tight" style={{ color: stat.color }}>{stat.value}</p>
+              </div>
+            ))}
+          </div>
         </motion.div>
+
+        {/* Dashboard Content */}
+        <div className="space-y-10">
+          {/* Tabs */}
+          <div className="flex gap-12 border-b" style={{ borderColor: 'var(--border-secondary)' }}>
+            {[
+              { id: "listings", label: "My Archives", count: myItems.length },
+              { id: "bids", label: "Acquisitions", count: 0 },
+              { id: "watchlist", label: "Watchlist", count: 0 }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className="pb-6 text-xs font-black uppercase tracking-[0.3em] relative transition-all"
+                style={{
+                  color: activeTab === tab.id ? 'var(--accent-primary)' : 'var(--text-tertiary)'
+                }}
+              >
+                {tab.label} <span className="opacity-40 ml-1">({tab.count})</span>
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute bottom-0 left-0 w-full h-1 rounded-full shadow-glow"
+                    style={{ background: 'var(--accent-primary)' }}
+                  />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Content Area */}
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            {loading ? (
+              <div className="text-center py-24">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2"
+                  style={{ borderColor: 'var(--accent-primary)' }}></div>
+              </div>
+            ) : myItems.length === 0 ? (
+              <div className="card-base text-center py-32 rounded-[3rem] border-dashed shadow-premium">
+                <p className="text-2xl font-serif italic mb-8 opacity-40" style={{ color: 'var(--text-primary)' }}>
+                  Your personal archives are currently empty.
+                </p>
+                <Link to="/additem">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    className="btn-primary px-10 py-4 rounded-[1.5rem] text-sm tracking-[0.2em]"
+                  >
+                    Curate First Artifact
+                  </motion.button>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center">
+                {myItems.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="w-full"
+                  >
+                    <AuctionCard item={item} />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </div>
       </div>
     </div>
   );
 }
+

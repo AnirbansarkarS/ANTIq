@@ -90,18 +90,32 @@ export const getItemById = async (itemId) => {
     if (error) throw error
     return data
 }
-
 /**
  * Create new item listing
  */
 export const createItem = async (itemData) => {
+    // For testing: if title contains "Test Item", set duration to 70 seconds
+    const auctionEndTime = itemData.title?.includes('Test Item')
+        ? new Date(Date.now() + 70000).toISOString()
+        : itemData.auction_end_time || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    // Clean data to avoid "column not found" errors for missing schema fields
+    const cleanData = {
+        title: itemData.title,
+        description: itemData.description,
+        price: itemData.price,
+        image_url: itemData.image_url,
+        owner_id: itemData.owner_id,
+        category: itemData.category || 'Artifacts',
+        status: 'active',
+        listing_type: 'auction',
+        auction_end_time: auctionEndTime,
+        listed_at: new Date().toISOString()
+    };
+
     const { data, error } = await supabase
         .from('items')
-        .insert({
-            ...itemData,
-            status: 'active',
-            listed_at: new Date().toISOString()
-        })
+        .insert(cleanData)
         .select()
         .single()
 
@@ -134,6 +148,7 @@ export const deleteItem = async (itemId) => {
         .eq('id', itemId)
 
     if (error) throw error
+    return true
 }
 
 /**
@@ -153,6 +168,76 @@ export const getUserItems = async (userId, status = null) => {
     const { data, error } = await query
     if (error) throw error
     return data
+}
+
+/**
+ * Close auction and process winner
+ */
+export const closeAuction = async (itemId) => {
+    // 1. Get the item details first
+    const { data: item, error: itemError } = await supabase
+        .from('items')
+        .select('*')
+        .eq('id', itemId)
+        .single()
+
+    if (itemError) throw itemError
+    if (item.status !== 'active') return { item, highestBid: null }
+
+    // 2. Get highest bid
+    const { data: highestBid, error: bidError } = await supabase
+        .from('bids')
+        .select('*')
+        .eq('item_id', itemId)
+        .order('amount', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    const hasWinner = highestBid !== null
+
+    // 3. Update item status
+    const newStatus = hasWinner ? 'sold' : 'ended'
+    const { data: updatedItem, error: updateError } = await supabase
+        .from('items')
+        .update({ status: newStatus })
+        .eq('id', itemId)
+        .select()
+        .single()
+
+    if (updateError) throw updateError
+
+    // 4. Create transaction and notifications if sold
+    if (hasWinner) {
+        await supabase.from('transactions').insert({
+            item_id: itemId,
+            buyer_id: highestBid.bidder_id,
+            seller_id: item.owner_id,
+            amount: highestBid.amount,
+            status: 'completed'
+        })
+
+        // Notify winner
+        await supabase.from('notifications').insert({
+            user_id: highestBid.bidder_id,
+            title: 'Auction Won! 🏆',
+            content: `Congratulations! You won the auction for "${item.title}" with a bid of $${highestBid.amount}.`,
+            type: 'auction_won',
+            item_id: itemId,
+            status: 'unread'
+        })
+
+        // Notify seller
+        await supabase.from('notifications').insert({
+            user_id: item.owner_id,
+            title: 'Item Sold! 💰',
+            content: `Your item "${item.title}" has been sold for $${highestBid.amount}.`,
+            type: 'item_sold',
+            item_id: itemId,
+            status: 'unread'
+        })
+    }
+
+    return { item: updatedItem, highestBid }
 }
 
 /**
@@ -347,6 +432,24 @@ export const isItemFavorited = async (userId, itemId) => {
 // ============================================
 // NOTIFICATION OPERATIONS
 // ============================================
+
+/**
+ * Create a notification
+ */
+export const createNotification = async (userId, notificationData) => {
+    const { data, error } = await supabase
+        .from('notifications')
+        .insert({
+            user_id: userId,
+            ...notificationData,
+            status: 'unread'
+        })
+        .select()
+        .single()
+
+    if (error) throw error
+    return data
+}
 
 /**
  * Get user's notifications

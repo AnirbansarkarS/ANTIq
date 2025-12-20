@@ -7,6 +7,7 @@ const Marketplace = () => {
   const [auctionItems, setAuctionItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
     fetchItems();
@@ -71,8 +72,25 @@ const Marketplace = () => {
     item.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    switch (sortBy) {
+      case "price-high":
+        return b.currentBid - a.currentBid;
+      case "price-low":
+        return a.currentBid - b.currentBid;
+      case "ending-soon":
+        return new Date(a.endTime) - new Date(b.endTime);
+      case "most-bids":
+        return b.bidCount - a.bidCount;
+      default: // newest
+        return b.id - a.id;
+    }
+  });
+
   return (
-    <div className="min-h-screen bg-[#fbf7ed] py-12">
+    <div
+      className="min-h-screen py-12 transition-colors duration-300"
+    >
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -80,41 +98,66 @@ const Marketplace = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h1 className="text-5xl font-serif font-bold text-amber-900 mb-4">
-            Historical Auctions
+          <h1
+            className="text-5xl font-serif font-bold mb-4"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            🏛 Historical Auctions
           </h1>
-          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+          <p
+            className="text-xl max-w-2xl mx-auto"
+            style={{ color: 'var(--text-secondary)' }}
+          >
             Discover rare antiques and collectibles from around the world
           </p>
         </motion.div>
 
+        {/* Search and Filter Bar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-8"
+          className="mb-8 flex flex-col md:flex-row gap-4"
         >
-          <div className="max-w-md mx-auto">
+          <div className="flex-1">
             <input
               type="text"
-              placeholder="Search for antiques..."
+              placeholder="🔍 Search for antiques..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full p-4 rounded-xl border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-300 bg-white text-amber-900 placeholder-gray-400 shadow-lg"
+              className="input-field shadow-lg h-16 text-lg"
+              style={{ padding: "1rem 1.25rem" }}
             />
           </div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="input-field shadow-lg h-12 text-base w-full md:w-56 cursor-pointer"
+            style={{ padding: "0.6rem 1rem" }}
+          >
+            <option value="newest" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Newest First</option>
+            <option value="ending-soon" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Ending Soon</option>
+            <option value="price-high" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Price: High to Low</option>
+            <option value="price-low" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Price: Low to High</option>
+            <option value="most-bids" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Most Bids</option>
+          </select>
         </motion.div>
 
         {loading ? (
           <div className="text-center py-12">
-            <p className="text-amber-900 text-xl font-serif">Loading treasures...</p>
+            <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4" style={{ borderColor: 'var(--accent-primary)' }}></div>
+            <p className="text-xl font-serif mt-4" style={{ color: 'var(--text-primary)' }}>
+              Loading treasures...
+            </p>
           </div>
-        ) : filteredItems.length === 0 ? (
+        ) : sortedItems.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 text-xl mb-4">No items found matching your search.</p>
+            <p className="text-xl mb-4" style={{ color: 'var(--text-secondary)' }}>
+              No items found matching your search.
+            </p>
             <button
               onClick={() => setSearchTerm("")}
-              className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
+              className="btn-primary"
             >
               Clear Search
             </button>
@@ -126,12 +169,13 @@ const Marketplace = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center"
           >
-            {filteredItems.map((item, index) => (
+            {sortedItems.map((item, index) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="w-full max-w-sm"
               >
                 <AuctionCard item={item} />
               </motion.div>
