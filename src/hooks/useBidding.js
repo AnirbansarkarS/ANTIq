@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseclient';
 import { placeBid, getItemBids } from '../lib/database';
 
 /**

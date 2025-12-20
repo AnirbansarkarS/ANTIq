@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient'
+import { supabase } from './supabaseclient'
 
 // ============================================
 // USER OPERATIONS
@@ -192,6 +192,8 @@ export const closeAuction = async (itemId) => {
         .order('amount', { ascending: false })
         .limit(1)
         .maybeSingle()
+
+    if (bidError) throw bidError
 
     const hasWinner = highestBid !== null
 

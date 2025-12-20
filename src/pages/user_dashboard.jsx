@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../lib/supabaseclient";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getUserStats, getUserItems } from "../lib/database";

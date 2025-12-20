@@ -2,7 +2,7 @@ import { useAuction, formatTimeLeft } from '../../hooks/useAuction';
 import { motion } from 'framer-motion';
 
 const AuctionTimer = ({ endTime, showLabel = true, size = 'md' }) => {
-    const { timeLeft, status, isEnded, isEndingSoon } = useAuction(endTime);
+    const { timeLeft, isEnded, isEndingSoon } = useAuction(endTime);
 
     if (!endTime) return null;
 
